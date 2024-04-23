@@ -6,7 +6,7 @@ const ShipOwnerSchema = new mongoose.Schema(
       required: true,
     },
     contact_name: {
-      type: Number,
+      type: String,
       required: true,
     },
     contact_email: {

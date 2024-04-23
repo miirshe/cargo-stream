@@ -1,23 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { BASE_URL } from "./BASE_URL";
-import Cookies from "js-cookie";
-const getToken = () => {
-  return Cookies.get("userToken");
-};
-
 export const itemSlice = createApi({
   reducerPath: "itemSlice",
   baseQuery: fetchBaseQuery({
-    baseUrl: BASE_URL,
-    prepareHeaders: (headers) => {
-      const token = getToken();
-      if (token) {
-        headers.set("Authorization", token);
-      }
-      return headers;
-    },
+    baseUrl: BASE_URL
   }),
-  tagTypes: ["itemApi"],
+  tagTypes: ["item"],
   endpoints: (builder) => ({
     createItem: builder.mutation({
       query: (newItem) => ({
@@ -25,7 +13,7 @@ export const itemSlice = createApi({
         method: "POST",
         body: newItem,
       }),
-      invalidatesTags: ["itemApi"],
+      invalidatesTags: ["item"],
     }),
     updateItem: builder.mutation({
       query: ({id, updateItem }) => ({
@@ -33,14 +21,14 @@ export const itemSlice = createApi({
         method: "PUT",
         body: updateItem,
       }),
-      invalidatesTags: ["itemApi"],
+      invalidatesTags: ["item"],
     }),
     deleteItem: builder.mutation({
         query: (id) => ({
           url: `/item/delete/${id}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["itemApi"],
+        invalidatesTags: ["item"],
       }),
     getItems: builder.query({
       query: () => {
@@ -49,7 +37,7 @@ export const itemSlice = createApi({
           method: "GET",
         };
       },
-      providesTags: ["itemApi"],
+      providesTags: ["item"],
     }),
   }),
 });

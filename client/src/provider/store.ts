@@ -14,8 +14,8 @@ export const store = configureStore({
     [shipOwnerSlice.reducerPath]: shipOwnerSlice.reducer,
     menu:menuSlice
   },
-  middleware: (getDefaultMiddlewre) =>
-    getDefaultMiddlewre().
+  middleware: (getDefaultMiddleware) =>
+  getDefaultMiddleware().
     concat(userSlice.middleware)
     .concat(itemSlice.middleware)
     .concat(shippingSlice.middleware)

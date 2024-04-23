@@ -1,7 +1,7 @@
 import { IoMdArrowBack } from "react-icons/io";
 import { Button } from "../components/ui/button";
 import { useTransition } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../components/ui/card";
 import {
   Form,
@@ -16,7 +16,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { itemSchema } from "../Schemas/item";
 import { z } from "zod";
-import { useCreateItemMutation } from "../provider/itemSlice";
+import {
+  useCreateItemMutation,
+  useUpdateItemMutation,
+} from "../provider/itemSlice";
 import toast from "react-hot-toast";
 import { FiLoader } from "react-icons/fi";
 import { Textarea } from "../components/ui/textarea";
@@ -26,18 +29,19 @@ import { useKindeAuth } from "@kinde-oss/kinde-auth-react";
 const AddItem = () => {
   const navigator = useNavigate();
   const { isAuthenticated, user } = useKindeAuth();
-
+  const itemState = useLocation().state;
   const form = useForm({
     resolver: zodResolver(itemSchema),
     defaultValues: {
-      item_name: "",
-      item_category: "",
-      item_description: "",
+      item_name: itemState?.item_name || "",
+      item_category: itemState?.item_category || "",
+      item_description: itemState?.item_description || "",
     },
   });
 
   const [isPending, startTransition] = useTransition();
   const [createItem] = useCreateItemMutation();
+  const [updateItem] = useUpdateItemMutation();
   async function onSubmit(values: z.infer<typeof itemSchema>) {
     const userId: string = (await user?.id) as string;
     const { item_name, item_category, item_description } = values;
@@ -50,17 +54,35 @@ const AddItem = () => {
 
     startTransition(() => {
       if (isAuthenticated) {
-        createItem({ item_name, item_category, item_description, userId })
-          .then((res) => {
-            const message = res?.data?.message;
+        const itemId = itemState?._id;
+        if (itemId) {
+          updateItem({
+            id: itemId,
+            updateItem: { item_name, item_category, item_description },
+          }).then((res) => {
+            const message = res?.data.message as string;
             if (message) {
               toast.success(message);
               navigator("/dashboard/items");
+            } else {
+              toast.error(message);
             }
-          })
-          .catch((error) => {
-            console.log(error);
           });
+        } else {
+          createItem({ item_name, item_category, item_description, userId })
+            .then((res) => {
+              const message = res?.data.message as string;
+              if (message) {
+                toast.success(message);
+                navigator("/dashboard/items");
+              } else {
+                toast.error(message);
+              }
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
       }
     });
   }
@@ -134,7 +156,7 @@ const AddItem = () => {
                         <FormControl>
                           <Textarea
                             className="w-full"
-                            rows={"5"}
+                            rows={5}
                             placeholder="Type  her Item Description"
                             {...field}
                             disabled={isPending}

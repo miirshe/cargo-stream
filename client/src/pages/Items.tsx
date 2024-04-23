@@ -24,13 +24,15 @@ const Items = () => {
       .includes(inputSearch?.toLowerCase() || "");
   });
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this item?")) {
-      deleteItem(id)
+      await deleteItem(id)
         .then((res) => {
           const message = res?.data?.message;
           if (message) {
             toast.success(message);
+          } else {
+            toast.error(message);
           }
         })
         .catch((error) => {
@@ -49,7 +51,12 @@ const Items = () => {
       renderCell: (params) => (
         <>
           <div className="flex justify-center items-center gap-3 h-full">
-            <MdEdit className="cursor-pointer text-blue-600" size={20} />
+            <Link
+              to={`/dashboard/item/edit/${params.row._id}`}
+              state={params.row}
+            >
+              <MdEdit className="cursor-pointer text-blue-600" size={20} />
+            </Link>
             <MdDelete
               className="cursor-pointer text-red-600"
               size={20}
